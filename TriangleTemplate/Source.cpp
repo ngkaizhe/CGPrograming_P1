@@ -18,6 +18,9 @@ ViewManager		m_camera;
 Shader shader;
 Model model;
 
+glm::mat4 translationMatrix[4];
+glm::vec3 relativePos[4];
+
 
 void My_Init()
 {
@@ -27,6 +30,16 @@ void My_Init()
 
 	shader = Shader("../Assets/shaders/vertex.vs.glsl", "../Assets/shaders/fragment.fs.glsl");
 	model = Model("../Assets/objects/nanosuit/nanosuit.obj");
+
+	// init all translationMatrix
+	for (int i = 0; i < 4; i++)
+		translationMatrix[i] = mat4();
+
+	relativePos[0] = vec3(0, 0, 0);
+	relativePos[1] = vec3(1, 0, 0);
+	relativePos[2] = vec3(1, 0, 0);
+	relativePos[3] = vec3(1, 0, 0);
+
 }
 
 // GLUT callback. Called to draw the scene.
@@ -39,10 +52,14 @@ void My_Display()
 	///////////////////////////	
 	shader.use();
 	
+	// set view matrix
+	shader.setUniformMatrix4fv("view", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
 	// set projection matrix
-	shader.setUniformMatrix4fv("projection", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
-	// set modelview matrix
-	shader.setUniformMatrix4fv("modelview", m_camera.GetProjectionMatrix(aspect));
+	shader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
+
+	// do something here
+	// set model matrix
+	shader.setUniformMatrix4fv("model", mat4(1.0));
 	// draw model
 	model.Draw(shader);
 
