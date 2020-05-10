@@ -192,6 +192,9 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Default", RobotState::DEFAULT);
 	glutAddMenuEntry("Walk", RobotState::WALK);
 	glutAddMenuEntry("Jump", RobotState::JUMP);
+	glutAddMenuEntry("Bow Down", RobotState::BOWDOWN);
+	glutAddMenuEntry("Attack", RobotState::ATTACK);
+	glutAddMenuEntry("Shoot", RobotState::SHOOT);
 
 	glutSetMenu(menu_main);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

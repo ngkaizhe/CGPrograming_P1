@@ -123,6 +123,15 @@ void Robot::ActionUpdate() {
 		case RobotState::JUMP:
 			this->DoJumpAction();
 			break;
+		case RobotState::CLAP:
+			this->DoClapAction();
+			break;
+		case RobotState::ATTACK:
+			this->DoAttackAction();
+			break;
+		case RobotState::SHOOT:
+			this->DoShootAction();
+			break;
 		default:
 			break;
 	}
@@ -690,4 +699,81 @@ void Robot::DoJumpAction() {
 		}
 	}
 
+}
+
+// clap hand
+void Robot::DoClapAction() {
+	// state 0 -> 準備動作
+	// state 1 -> 鞠躬
+	// state 2 -> 回去ready pos
+	// regular procedure
+	// 0->1->2->1->2....
+
+	// determine which bow state we are in
+	// by using the std::chrono func provided by c++
+	vector<float>timerPerState = { 2, 0.5, 0.5};
+	double passTime;
+	int clapState = stateDetermination(timerPerState, passTime, 1);
+
+	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
+	if (clapState != previousStateIndex) {
+		previousStateIndex = clapState;
+		previousPassTime = 0;
+	}
+
+	// recalculate the passTime to be interval between previousPassTime instead of the state time
+	double t = passTime;
+	passTime -= previousPassTime;
+	previousPassTime = t;
+
+	if (clapState == 0) {
+		double totalYTranslation = -0.038;
+		double totalZRotation = -36;
+
+		// find the current rotation needed to add
+		double zRotationNeeded = passTime / timerPerState[clapState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[clapState] * totalYTranslation;
+
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		// there other side, the rotation signed will be different
+		this->rotations[RHAND0].z += -zRotationNeeded;
+	}
+
+	else if (clapState == 1) {
+
+	}
+
+	else if (clapState == 2) {
+
+	}
+}
+
+// attack
+void Robot::DoAttackAction() {
+
+}
+
+// shoot
+void Robot::DoShootAction() {
+
+}
+
+// action helper
+void Robot::actionHelper(int bodyPart, double passTime, vector<float>timerPerState, int stateIndex, vec3 addedTranslation, vec3 addedRotation) {
+	// translation
+	double xTranslationNeeded = passTime / timerPerState[stateIndex] * addedTranslation.x;
+	double yTranslationNeeded = passTime / timerPerState[stateIndex] * addedTranslation.y;
+	double zTranslationNeeded = passTime / timerPerState[stateIndex] * addedTranslation.z;
+	// rotation
+	double xRotationNeeded = passTime / timerPerState[stateIndex] * addedRotation.x;
+	double yRotationNeeded = passTime / timerPerState[stateIndex] * addedRotation.y;
+	double zRotationNeeded = passTime / timerPerState[stateIndex] * addedRotation.z;
+
+	// add up rotation and translation for the correct part
+	this->translatePos[bodyPart] += vec3(xTranslationNeeded, yTranslationNeeded, zTranslationNeeded);
+	this->rotations[bodyPart] += vec3(xRotationNeeded, yRotationNeeded, zRotationNeeded);
 }

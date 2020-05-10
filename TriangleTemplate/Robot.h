@@ -14,7 +14,7 @@ enum RobotState {
 	DEFAULT = 0,
 	WALK = 1,
 	JUMP = 2,
-	BOWDOWN = 3,
+	CLAP = 3,
 	ORZ = 4,
 	ATTACK = 5,
 	SHOOT = 6,
@@ -78,14 +78,21 @@ private:
 	void reset();
 
 	// actions functions
-	// walk
-	// keep doing it very frame
-	void DoWalkAction();
-	// walk action needed var
+	// action needed var
 	double previousPassTime;
 	double previousStateIndex;
 
+	// walk
+	void DoWalkAction();
 	// jump
 	void DoJumpAction();
+	// bow down
+	void DoClapAction();
+	// attack
+	void DoAttackAction();
+	// shoot
+	void DoShootAction();
+	// action helper
+	void actionHelper(int bodyPart, double passTime, vector<float>timerPerState, int stateIndex, vec3 addedTranslation, vec3 addedRotation);
 };
 
