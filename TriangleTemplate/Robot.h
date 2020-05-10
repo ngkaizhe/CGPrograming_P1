@@ -11,13 +11,13 @@ using namespace glm;
 using namespace std;
 
 enum RobotState {
-	DEFAULT,
-	WALK,
-	JUMP,
-	BOWDOWN,
-	ORZ,
-	ATTACK,
-	SHOOT,
+	DEFAULT = 0,
+	WALK = 1,
+	JUMP = 2,
+	BOWDOWN = 3,
+	ORZ = 4,
+	ATTACK = 5,
+	SHOOT = 6,
 };
 
 enum ShaderMode {

@@ -101,10 +101,6 @@ void My_Keyboard(unsigned char key, int x, int y)
 {
 	m_camera.keyEvents(key);
 	printf("Key %c is pressed at (%d, %d)\n", key, x, y);
-
-	if (key == 'p') {
-		robot.setState(RobotState::WALK);
-	}
 }
 
 //Special key event
@@ -128,22 +124,25 @@ void My_SpecialKeys(int key, int x, int y)
 }
 
 //Menu event
-void My_Menu(int id)
+void mainMenuFunc(int id)
 {
 	switch (id)
 	{
-	case MENU_Entry1:
-		printf("Entry1 is selected.\n");
-		break;
-	case MENU_Entry2:
-		printf("Entry2 is selected.\n");
-		break;
 	case MENU_EXIT:
 		exit(0);
 		break;
 	default:
 		break;
 	}
+}
+
+// state menu function
+void stateMenuFunc(int id) {
+	robot.setState((RobotState)id);
+}
+
+// shader menu function
+void shaderMenuFunc(int id) {
 }
 
 
@@ -182,16 +181,16 @@ int main(int argc, char *argv[])
 
 	//Define Menu
 	////////////////////
-	int menu_main = glutCreateMenu(My_Menu);
-	int menu_entry = glutCreateMenu(My_Menu);
+	int menu_main = glutCreateMenu(mainMenuFunc);
+	int menu_state = glutCreateMenu(stateMenuFunc);
 
 	glutSetMenu(menu_main);
-	glutAddSubMenu("Entry", menu_entry);
+	glutAddSubMenu("Action", menu_state);
 	glutAddMenuEntry("Exit", MENU_EXIT);
 
-	glutSetMenu(menu_entry);
-	glutAddMenuEntry("Print Entry1", MENU_Entry1);
-	glutAddMenuEntry("Print Entry2", MENU_Entry2);
+	glutSetMenu(menu_state);
+	glutAddMenuEntry("Default", RobotState::DEFAULT);
+	glutAddMenuEntry("Walk", RobotState::WALK);
 
 	glutSetMenu(menu_main);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

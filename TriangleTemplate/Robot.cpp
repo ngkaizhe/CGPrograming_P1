@@ -82,7 +82,7 @@ void Robot::DoWalkAction() {
 
 	// determine which walk state we are in
 	// by using the std::chrono func provided by c++
-	vector<float>timerPerState = { 1, 2, 2, 2, 2 };
+	vector<float>timerPerState = { 0.5, 1, 1, 1, 1 };
 	double passTime;
 	int walkState = stateDetermination(timerPerState, passTime, 1);
 	// cout << "Walk State is " << walkState << '\n';
@@ -118,6 +118,7 @@ void Robot::DoWalkAction() {
 
 	// state 1 -> 右手上升，左右下降
 	else if (walkState == 1) {
+		// hand part
 		double totalYTranslation = -0.044;
 		double totalXRotation = -35;
 		double totalYRotation = -22;
@@ -129,16 +130,26 @@ void Robot::DoWalkAction() {
 		// find the translation needed to add
 		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
 
-		// left part
+		// left hand part
 		this->translatePos[LHAND0].y += yTranslatioNeeded;
 		this->rotations[LHAND0].x += xRotationNeeded;
 		this->rotations[LHAND0].y += yRotationNeeded;
 		this->rotations[LHAND0].z += zRotationNeeded;
-		// right part
+		// right hand part
 		this->translatePos[RHAND0].y += yTranslatioNeeded;
 		this->rotations[RHAND0].x += -xRotationNeeded;
 		this->rotations[RHAND0].y += yRotationNeeded;
 		this->rotations[RHAND0].z += -zRotationNeeded;
+
+
+		// leg part
+		totalXRotation = -20;
+		xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+
+		// left leg
+		this->rotations[LLEG0].x += xRotationNeeded;
+		// right leg
+		this->rotations[RLEG0].x += -xRotationNeeded;
 	}
 
 	// state 2 -> 右手下降至中心，左手上升至中心
@@ -165,6 +176,14 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].y += yRotationNeeded;
 		this->rotations[RHAND0].z += -zRotationNeeded;
 
+		// leg part
+		totalXRotation = 20;
+		xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+
+		// left leg
+		this->rotations[LLEG0].x += xRotationNeeded;
+		// right leg
+		this->rotations[RLEG0].x += -xRotationNeeded;
 	}
 
 	// state 3 -> 左手上升，右手下降
@@ -190,6 +209,15 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].x += -xRotationNeeded;
 		this->rotations[RHAND0].y += yRotationNeeded;
 		this->rotations[RHAND0].z += -zRotationNeeded;
+
+		// leg part
+		totalXRotation = 20;
+		xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+
+		// left leg
+		this->rotations[LLEG0].x += xRotationNeeded;
+		// right leg
+		this->rotations[RLEG0].x += -xRotationNeeded;
 	}
 
 	// state 4 -> 左手下降至中心，右手上升至中心
@@ -215,6 +243,15 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].x += -xRotationNeeded;
 		this->rotations[RHAND0].y += yRotationNeeded;
 		this->rotations[RHAND0].z += -zRotationNeeded;
+
+		// leg part
+		totalXRotation = -20;
+		xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+
+		// left leg
+		this->rotations[LLEG0].x += xRotationNeeded;
+		// right leg
+		this->rotations[RLEG0].x += -xRotationNeeded;
 	}
 }
 
@@ -286,7 +323,8 @@ void Robot::setState(RobotState toState) {
 			previousPassTime = 0;
 			previousStateIndex = 0;
 		}
-	}	
+	}
+
 	// set the state
 	this->robotState = toState;
 }
@@ -298,7 +336,10 @@ void Robot::setShader(ShaderMode shaderMode) {
 
 // reset
 void Robot::reset() {
-
+	for (int i = 0; i < TOTALPART; i++) {
+		translatePos[i] = vec3(0.0f);
+		rotations[i] = vec3(0.0f);
+	}
 }
 
 // determine which state currently by the action
