@@ -78,10 +78,14 @@ private:
 	void reset();
 
 	// actions functions
+	// walk
 	// keep doing it very frame
 	void DoWalkAction();
 	// walk action needed var
 	double previousPassTime;
 	double previousStateIndex;
+
+	// jump
+	void DoJumpAction();
 };
 
