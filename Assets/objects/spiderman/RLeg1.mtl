@@ -1,0 +1,16 @@
+# Blender MTL File: 'spiderman.blend'
+# Material Count: 1
+
+newmtl Material_#335.003
+Ns 18.000005
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump spiderman.norm.png
+map_Kd spiderman.dff.png
+map_Ks spiderman.spec.png
+map_d spiderman.dff.png

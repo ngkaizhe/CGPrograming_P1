@@ -3,6 +3,7 @@
 #include "ViewManager.h"
 #include"Shader.h"
 #include"Model.h"
+#include "Robot.h"
 
 #define MENU_Entry1 1
 #define MENU_Entry2 2
@@ -16,10 +17,7 @@ float			aspect;
 ViewManager		m_camera;
 
 Shader shader;
-Model model;
-
-glm::mat4 translationMatrix[4];
-glm::vec3 relativePos[4];
+Robot robot;
 
 
 void My_Init()
@@ -29,17 +27,8 @@ void My_Init()
 	glDepthFunc(GL_LEQUAL);
 
 	shader = Shader("../Assets/shaders/vertex.vs.glsl", "../Assets/shaders/fragment.fs.glsl");
-	model = Model("../Assets/objects/nanosuit/nanosuit.obj");
-
-	// init all translationMatrix
-	for (int i = 0; i < 4; i++)
-		translationMatrix[i] = mat4();
-
-	relativePos[0] = vec3(0, 0, 0);
-	relativePos[1] = vec3(1, 0, 0);
-	relativePos[2] = vec3(1, 0, 0);
-	relativePos[3] = vec3(1, 0, 0);
-
+	robot = Robot();
+	robot.initModels();
 }
 
 // GLUT callback. Called to draw the scene.
@@ -57,11 +46,11 @@ void My_Display()
 	// set projection matrix
 	shader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
 
-	// do something here
-	// set model matrix
-	shader.setUniformMatrix4fv("model", mat4(1.0));
-	// draw model
-	model.Draw(shader);
+	// draw robot
+	robot.Draw(shader);
+
+	// call robot update function
+	robot.Update();
 
 	///////////////////////////	
 
