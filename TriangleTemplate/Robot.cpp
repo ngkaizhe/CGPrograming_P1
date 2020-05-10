@@ -1,5 +1,6 @@
 #include "Robot.h"
 
+
 Robot::Robot() {
 	// init model(robot part)
 	robot = vector<Model>(12);
@@ -49,9 +50,12 @@ Robot::Robot() {
 	relations[RLEG0].push_back(RLEG1);
 
 	Update();
+
+	// init timer
+	timer = chrono::steady_clock::now();
 }
 
-void Robot::initModels() {
+void Robot::InitModels() {
 	robot[BODY] = Model("../Assets/objects/spiderman/Body.obj");
 	robot[HEAD] = Model("../Assets/objects/spiderman/Head.obj");
 	robot[LBODY] = Model("../Assets/objects/spiderman/LBody.obj");
@@ -73,7 +77,138 @@ void Robot::StartWalk() {
 
 // keep doing it very frame
 void Robot::DoWalkAction() {
+	// state 0 -> 準備動作
+	// state 1 -> 右手上升，左右下降
+	// state 2 -> 右手下降至中心，左手上升至中心
+	// state 3 -> 左手上升，右手下降
+	// state 4 -> 左手下降至中心，右手上升至中心
+	// regular procedure
+	// 0->1->2->3->4->1->2->3->4...
 
+	// determine which walk state we are in
+	// by using the std::chrono func provided by c++
+	vector<float>timerPerState = { 1, 2, 2, 2, 2 };
+	double passTime;
+	int walkState = stateDetermination(timerPerState, passTime, 1);
+
+	// state 0 -> 準備動作
+	if (walkState == 0) {
+		double totalYTranslation = -0.038;
+		double totalZRotation = -36;
+
+		// find the current rotation needed to add
+		double zRotationNeeded = passTime / timerPerState[walkState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
+
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		// there other side, the rotation signed will be different
+		this->rotations[RHAND0].z += -zRotationNeeded;
+ 	}
+
+	// state 1 -> 右手上升，左右下降
+	else if (walkState == 1) {
+		double totalYTranslation = -0.044;
+		double totalXRotation = -35;
+		double totalYRotation = -22;
+		double totalZRotation = 6;
+
+		double xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+		double yRotationNeeded = passTime / timerPerState[walkState] * totalYRotation;
+		double zRotationNeeded = passTime / timerPerState[walkState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
+
+		// left part
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].x += xRotationNeeded;
+		this->rotations[LHAND0].y += yRotationNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+		// right part
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		this->rotations[RHAND0].x += -xRotationNeeded;
+		this->rotations[RHAND0].y += yRotationNeeded;
+		this->rotations[RHAND0].z += -zRotationNeeded;
+	}
+
+	// state 2 -> 右手下降至中心，左手上升至中心
+	else if (walkState == 2) {
+		double totalYTranslation = 0.044;
+		double totalXRotation = 35;
+		double totalYRotation = 22;
+		double totalZRotation = -6;
+
+		double xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+		double yRotationNeeded = passTime / timerPerState[walkState] * totalYRotation;
+		double zRotationNeeded = passTime / timerPerState[walkState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
+
+		// left part
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].x += xRotationNeeded;
+		this->rotations[LHAND0].y += yRotationNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+		// right part
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		this->rotations[RHAND0].x += -xRotationNeeded;
+		this->rotations[RHAND0].y += yRotationNeeded;
+		this->rotations[RHAND0].z += -zRotationNeeded;
+
+	}
+
+	// state 3 -> 左手上升，右手下降
+	else if (walkState == 3) {
+		double totalYTranslation = -0.044;
+		double totalXRotation = 40;
+		double totalYRotation = 25;
+		double totalZRotation = 11;
+
+		double xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+		double yRotationNeeded = passTime / timerPerState[walkState] * totalYRotation;
+		double zRotationNeeded = passTime / timerPerState[walkState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
+
+		// left part
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].x += xRotationNeeded;
+		this->rotations[LHAND0].y += yRotationNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+		// right part
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		this->rotations[RHAND0].x += -xRotationNeeded;
+		this->rotations[RHAND0].y += yRotationNeeded;
+		this->rotations[RHAND0].z += -zRotationNeeded;
+	}
+	// state 4 -> 左手下降至中心，右手上升至中心
+
+	else if (walkState == 4) {
+		double totalYTranslation = 0.044;
+		double totalXRotation = -40;
+		double totalYRotation = -25;
+		double totalZRotation = -11;
+
+		double xRotationNeeded = passTime / timerPerState[walkState] * totalXRotation;
+		double yRotationNeeded = passTime / timerPerState[walkState] * totalYRotation;
+		double zRotationNeeded = passTime / timerPerState[walkState] * totalZRotation;
+		// find the translation needed to add
+		double yTranslatioNeeded = passTime / timerPerState[walkState] * totalYTranslation;
+
+		// left part
+		this->translatePos[LHAND0].y += yTranslatioNeeded;
+		this->rotations[LHAND0].x += xRotationNeeded;
+		this->rotations[LHAND0].y += yRotationNeeded;
+		this->rotations[LHAND0].z += zRotationNeeded;
+		// right part
+		this->translatePos[RHAND0].y += yTranslatioNeeded;
+		this->rotations[RHAND0].x += -xRotationNeeded;
+		this->rotations[RHAND0].y += yRotationNeeded;
+		this->rotations[RHAND0].z += -zRotationNeeded;
+	}
 }
 
 // draw all models
@@ -87,6 +222,12 @@ void Robot::Draw(Shader shader) {
 
 // self update
 void Robot::Update() {
+	ActionUpdate();
+	ModelMatUpdate();
+}
+
+// model mat update
+void Robot::ModelMatUpdate(){
 	// we will update all model mats depends on its parent relationship
 	// we should do all operation for body first
 	modelMats[BODY] = translate(mat4(1.0f), relativePositions[BODY]);
@@ -105,14 +246,86 @@ void Robot::Update() {
 			// self translation and rotation
 			modelMats[childID] = translate(modelMats[childID], translatePos[childID]);
 
-			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].x),  vec3(1.0, 0.0, 0.0));
+			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].x), vec3(1.0, 0.0, 0.0));
 			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].y), vec3(0.0, 1.0, 0.0));
 			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].z), vec3(0.0, 0.0, 1.0));
 		}
 	}
 }
 
+// action update
+void Robot::ActionUpdate() {
+	switch (this->robotState) {
+		case RobotState::DEFAULT:
+			break;
+		case RobotState::WALK:
+			this->DoWalkAction();
+			break;
+		default:
+			break;
+	}
+}
+
+// state transition
+void Robot::setState(RobotState toState) {
+	// reset all position
+	if (this->robotState != toState) {
+		this->reset();
+		// reset timer that used for state
+		timer = chrono::steady_clock::now();
+	}	
+	// set the state
+	this->robotState = toState;
+}
+
+// shader transition
+void Robot::setShader(ShaderMode shaderMode) {
+
+}
+
 // reset
 void Robot::reset() {
 
+}
+
+// determine which state currently by the action
+int Robot::stateDetermination(vector<float>timeNeededPerState, double& passSeconds, int repeatStartIndex = 0) {
+	double elapsedSeconds = (chrono::steady_clock::now() - timer).count();
+	
+	// calculated the unrepeat part
+	float unrepeatTotalTime = 0;
+	for (int i = 0; i < repeatStartIndex; i++) unrepeatTotalTime += timeNeededPerState[i];
+	// check whether the time dropped inside the unrepeat range
+	if (elapsedSeconds < unrepeatTotalTime) {
+		float tempTimer = 0;
+		for (int i = 0; i < repeatStartIndex; i++) {
+			tempTimer += timeNeededPerState[i];
+			if (tempTimer > elapsedSeconds) {
+				passSeconds = elapsedSeconds - (tempTimer - timeNeededPerState[i]);
+				return i;
+			}
+		}
+		// shouldn't run till here
+		throw "The Elapsed Second is smaller than the unrepeatTotalTime, but the state wasn't found in the loop!!!";
+	}
+
+	// cut off the unrepeat part
+	elapsedSeconds -= unrepeatTotalTime;
+	// calculated the repeat part
+	float repeatTotalTime = 0;
+	for (int i = repeatStartIndex; i < timeNeededPerState.size(); i++) repeatTotalTime += timeNeededPerState[i];
+	// find remainder
+	while (elapsedSeconds >= repeatTotalTime) elapsedSeconds -= repeatTotalTime;
+	// check whether the time dropped inside the repeat range
+	float tempTimer = 0;
+	for (int i = repeatStartIndex; i < timeNeededPerState.size(); i++) {
+		tempTimer += timeNeededPerState[i];
+		if (tempTimer > elapsedSeconds) {
+			passSeconds = elapsedSeconds - (tempTimer - timeNeededPerState[i]);
+			return i;
+		}
+	}
+
+	// should run till here
+	throw "Can't find any state even after repeat part calculated!!!";
 }

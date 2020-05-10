@@ -28,7 +28,7 @@ void My_Init()
 
 	shader = Shader("../Assets/shaders/vertex.vs.glsl", "../Assets/shaders/fragment.fs.glsl");
 	robot = Robot();
-	robot.initModels();
+	robot.InitModels();
 }
 
 // GLUT callback. Called to draw the scene.
@@ -101,6 +101,10 @@ void My_Keyboard(unsigned char key, int x, int y)
 {
 	m_camera.keyEvents(key);
 	printf("Key %c is pressed at (%d, %d)\n", key, x, y);
+
+	if (key == 'p') {
+		robot.setState(RobotState::WALK);
+	}
 }
 
 //Special key event
