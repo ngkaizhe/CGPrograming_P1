@@ -1,4 +1,4 @@
-#include "Robot.h"
+ï»¿#include "Robot.h"
 
 
 Robot::Robot() {
@@ -70,18 +70,13 @@ void Robot::InitModels() {
 	robot[RLEG1] = Model("../Assets/objects/spiderman/RLeg1.obj");
 }
 
-// start some action
-void Robot::StartWalk() {
-
-}
-
 // keep doing it very frame
 void Robot::DoWalkAction() {
-	// state 0 -> ·Ç³Æ°Ê§@
-	// state 1 -> ¥k¤â¤W¤É¡A¥ª¥k¤U­°
-	// state 2 -> ¥k¤â¤U­°¦Ü¤¤¤ß¡A¥ª¤â¤W¤É¦Ü¤¤¤ß
-	// state 3 -> ¥ª¤â¤W¤É¡A¥k¤â¤U­°
-	// state 4 -> ¥ª¤â¤U­°¦Ü¤¤¤ß¡A¥k¤â¤W¤É¦Ü¤¤¤ß
+	// state 0 -> æº–å‚™å‹•ä½œ
+	// state 1 -> å³æ‰‹ä¸Šå‡ï¼Œå·¦å³ä¸‹é™
+	// state 2 -> å³æ‰‹ä¸‹é™è‡³ä¸­å¿ƒï¼Œå·¦æ‰‹ä¸Šå‡è‡³ä¸­å¿ƒ
+	// state 3 -> å·¦æ‰‹ä¸Šå‡ï¼Œå³æ‰‹ä¸‹é™
+	// state 4 -> å·¦æ‰‹ä¸‹é™è‡³ä¸­å¿ƒï¼Œå³æ‰‹ä¸Šå‡è‡³ä¸­å¿ƒ
 	// regular procedure
 	// 0->1->2->3->4->1->2->3->4...
 
@@ -90,8 +85,20 @@ void Robot::DoWalkAction() {
 	vector<float>timerPerState = { 1, 2, 2, 2, 2 };
 	double passTime;
 	int walkState = stateDetermination(timerPerState, passTime, 1);
+	// cout << "Walk State is " << walkState << '\n';
+	
+	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
+	if (walkState != previousStateIndex) {
+		previousStateIndex = walkState;
+		previousPassTime = 0;
+	}
 
-	// state 0 -> ·Ç³Æ°Ê§@
+	// recalculate the passTime to be interval between previousPassTime instead of the state time
+	double t = passTime;
+	passTime -= previousPassTime;
+	previousPassTime = t;
+
+	// state 0 -> æº–å‚™å‹•ä½œ
 	if (walkState == 0) {
 		double totalYTranslation = -0.038;
 		double totalZRotation = -36;
@@ -109,7 +116,7 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].z += -zRotationNeeded;
  	}
 
-	// state 1 -> ¥k¤â¤W¤É¡A¥ª¥k¤U­°
+	// state 1 -> å³æ‰‹ä¸Šå‡ï¼Œå·¦å³ä¸‹é™
 	else if (walkState == 1) {
 		double totalYTranslation = -0.044;
 		double totalXRotation = -35;
@@ -134,7 +141,7 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].z += -zRotationNeeded;
 	}
 
-	// state 2 -> ¥k¤â¤U­°¦Ü¤¤¤ß¡A¥ª¤â¤W¤É¦Ü¤¤¤ß
+	// state 2 -> å³æ‰‹ä¸‹é™è‡³ä¸­å¿ƒï¼Œå·¦æ‰‹ä¸Šå‡è‡³ä¸­å¿ƒ
 	else if (walkState == 2) {
 		double totalYTranslation = 0.044;
 		double totalXRotation = 35;
@@ -160,7 +167,7 @@ void Robot::DoWalkAction() {
 
 	}
 
-	// state 3 -> ¥ª¤â¤W¤É¡A¥k¤â¤U­°
+	// state 3 -> å·¦æ‰‹ä¸Šå‡ï¼Œå³æ‰‹ä¸‹é™
 	else if (walkState == 3) {
 		double totalYTranslation = -0.044;
 		double totalXRotation = 40;
@@ -184,8 +191,8 @@ void Robot::DoWalkAction() {
 		this->rotations[RHAND0].y += yRotationNeeded;
 		this->rotations[RHAND0].z += -zRotationNeeded;
 	}
-	// state 4 -> ¥ª¤â¤U­°¦Ü¤¤¤ß¡A¥k¤â¤W¤É¦Ü¤¤¤ß
 
+	// state 4 -> å·¦æ‰‹ä¸‹é™è‡³ä¸­å¿ƒï¼Œå³æ‰‹ä¸Šå‡è‡³ä¸­å¿ƒ
 	else if (walkState == 4) {
 		double totalYTranslation = 0.044;
 		double totalXRotation = -40;
@@ -273,6 +280,12 @@ void Robot::setState(RobotState toState) {
 		this->reset();
 		// reset timer that used for state
 		timer = chrono::steady_clock::now();
+		
+		// reset walk state used var
+		if (toState == RobotState::WALK) {
+			previousPassTime = 0;
+			previousStateIndex = 0;
+		}
 	}	
 	// set the state
 	this->robotState = toState;
@@ -290,7 +303,7 @@ void Robot::reset() {
 
 // determine which state currently by the action
 int Robot::stateDetermination(vector<float>timeNeededPerState, double& passSeconds, int repeatStartIndex = 0) {
-	double elapsedSeconds = (chrono::steady_clock::now() - timer).count();
+	double elapsedSeconds = ((chrono::duration<double>)(chrono::steady_clock::now() - timer)).count();
 	
 	// calculated the unrepeat part
 	float unrepeatTotalTime = 0;
