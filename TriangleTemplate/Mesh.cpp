@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include"ParticleManager.h"
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, Material material) {
 	this->vertices = vertices;
@@ -49,7 +50,19 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 		// it is particle do something
 		// use our own vbo to set objPos
 		// bind our position here
-		
+		ParticleManager* particleManager = ParticleManager::getParticleManager();
+		if (particleManager->positions.size() != 0) {
+			unsigned int instanceVBO;
+			glGenBuffers(1, &instanceVBO);
+
+			glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * particleManager->positions.size(), &(particleManager->positions)[0], GL_STATIC_DRAW);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+			glVertexAttribDivisor(3, 1);
+			glEnableVertexAttribArray(3);
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 	}
 }
 

@@ -194,7 +194,7 @@ int Robot::stateDetermination(vector<float>timeNeededPerState, double& passSecon
 		for (int i = 0; i < repeatStartIndex; i++) {
 			tempTimer += timeNeededPerState[i];
 			if (tempTimer > elapsedSeconds) {
-				passSeconds = elapsedSeconds - (tempTimer - timeNeededPerState[i]);
+				passSeconds = elapsedSeconds - ((double)tempTimer - timeNeededPerState[i]);
 				return i;
 			}
 		}
@@ -214,7 +214,7 @@ int Robot::stateDetermination(vector<float>timeNeededPerState, double& passSecon
 	for (int i = repeatStartIndex; i < timeNeededPerState.size(); i++) {
 		tempTimer += timeNeededPerState[i];
 		if (tempTimer > elapsedSeconds) {
-			passSeconds = elapsedSeconds - (tempTimer - timeNeededPerState[i]);
+			passSeconds = elapsedSeconds - ((double)tempTimer - timeNeededPerState[i]);
 			return i;
 		}
 	}

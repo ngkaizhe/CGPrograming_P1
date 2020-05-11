@@ -1,9 +1,9 @@
 #pragma once
 #include "Common.h"
 #include "Model.h"
+#include"ParticleManager.h"
 #include "Constant.h"
 #include "Shader.h"
-#include "ParticleManager.h"
 
 #include <vector>
 #include<chrono>
