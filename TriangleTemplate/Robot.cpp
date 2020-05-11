@@ -976,7 +976,36 @@ void Robot::DoDanceAction() {
 
 // shoot
 void Robot::DoShootAction() {
+	// state 0 -> 準備動作
+	// state 1 -> 左手扶額頭
+	// state 2 -> 右手擡起
+	// state 3 -> 右手準備噴網
+	// state 4 -> 保持姿勢，右手噴網 
+	// regular procedure
+	// 0->1->2->3->4->4->4->
 
+	// determine which bow state we are in
+	// by using the std::chrono func provided by c++
+	vector<float>timerPerState = { 2, 1, 0.5, 0.05, 1};
+	double passTime;
+	int danceState = stateDetermination(timerPerState, passTime, 4);
+
+	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
+	if (danceState != previousStateIndex) {
+		previousStateIndex = danceState;
+		previousPassTime = 0;
+	}
+
+	// recalculate the passTime to be interval between previousPassTime instead of the state time
+	double t = passTime;
+	passTime -= previousPassTime;
+	previousPassTime = t;
+
+	// actionStack[stateIndex]...
+	vector<vector<ActionStack>> actionStack =
+	{};
+
+	calculateActionStack(actionStack, danceState, passTime, timerPerState);
 }
 
 // action helper
