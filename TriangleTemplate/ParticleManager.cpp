@@ -77,10 +77,13 @@ void ParticleManager::CreateUpdate() {
     // create a instance every time it get called
     // if it is in the shoot state
     if (isShoot) {
-        positions.push_back(vec3(startPosition));
-        float dx = (rand() % 1000) / 100000.0;
-        float dy = (rand() % 1000) / 100000.0;
-        // get random
-        directions.push_back(vec3(dx, dy, 0));
+        int total = 10;
+        for (int i = 0; i < total; i++) {
+            positions.push_back(vec3(startPosition));
+            float dx = (rand() % 1000) / 100000.0;
+            float dy = (rand() % 1000) / 100000.0;
+            // get random
+            directions.push_back(vec3(dx, dy, 0));
+        }
     }
 }
