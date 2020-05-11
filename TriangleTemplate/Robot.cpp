@@ -704,16 +704,17 @@ void Robot::DoJumpAction() {
 // clap hand
 void Robot::DoClapAction() {
 	// state 0 -> 準備動作
-	// state 1 -> 鞠躬
-	// state 2 -> 回去ready pos
+	// state 1 -> 雙手準備
+	// state 2 -> 雙手擊掌
+	// state 3 -> 回去雙手準備的狀態
 	// regular procedure
-	// 0->1->2->1->2....
+	// 0->1->2->3->2->3->2->3....
 
 	// determine which bow state we are in
 	// by using the std::chrono func provided by c++
-	vector<float>timerPerState = { 2, 0.5, 0.5};
+	vector<float>timerPerState = { 2, 2, 0.5, 0.5};
 	double passTime;
-	int clapState = stateDetermination(timerPerState, passTime, 1);
+	int clapState = stateDetermination(timerPerState, passTime, 2);
 
 	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
 	if (clapState != previousStateIndex) {
@@ -726,29 +727,48 @@ void Robot::DoClapAction() {
 	passTime -= previousPassTime;
 	previousPassTime = t;
 
+	// state 0 -> 準備動作
 	if (clapState == 0) {
-		double totalYTranslation = -0.038;
-		double totalZRotation = -36;
-
-		// find the current rotation needed to add
-		double zRotationNeeded = passTime / timerPerState[clapState] * totalZRotation;
-		// find the translation needed to add
-		double yTranslatioNeeded = passTime / timerPerState[clapState] * totalYTranslation;
-
-		this->translatePos[LHAND0].y += yTranslatioNeeded;
-		this->rotations[LHAND0].z += zRotationNeeded;
-
-		this->translatePos[RHAND0].y += yTranslatioNeeded;
-		// there other side, the rotation signed will be different
-		this->rotations[RHAND0].z += -zRotationNeeded;
+		// LHAND0
+		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, -36));
+		// RHAND0
+		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, 36));
 	}
 
+	// state 1 -> 雙手準備
 	else if (clapState == 1) {
-
+		// LHAND0
+		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.085+0.038, 0), vec3(-53, -34, -21+36));
+		// LHAND1
+		//this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-47, -3, -55));
+		// RHAND0
+		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.095+0.038, 0), vec3(-62, 32, 16-36));
+		// RHAND1
+		//this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(-0.797, 0, 0), vec3(-35, 68, -11));
 	}
 
+	// state 2 -> 雙手擊掌
 	else if (clapState == 2) {
+		// LHAND0
+		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+		// LHAND1
+		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-42+47, -15+3, -96+55));
+		// RHAND0
+		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+		// RHAND1
+		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(218+35, 66-68, 220+11));
+	}
 
+	// state 3 -> 回去雙手準備的狀態
+	else if (clapState == 3) {
+		// LHAND0
+		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+		// LHAND1
+		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-47+42, -3+15, -55+96));
+		// RHAND0
+		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+		// RHAND1
+		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-35-218, 68-66, -11-220));
 	}
 }
 

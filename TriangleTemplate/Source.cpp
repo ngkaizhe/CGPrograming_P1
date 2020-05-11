@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Default", RobotState::DEFAULT);
 	glutAddMenuEntry("Walk", RobotState::WALK);
 	glutAddMenuEntry("Jump", RobotState::JUMP);
-	glutAddMenuEntry("Bow Down", RobotState::BOWDOWN);
+	glutAddMenuEntry("Clap Hand", RobotState::CLAP);
 	glutAddMenuEntry("Attack", RobotState::ATTACK);
 	glutAddMenuEntry("Shoot", RobotState::SHOOT);
 
