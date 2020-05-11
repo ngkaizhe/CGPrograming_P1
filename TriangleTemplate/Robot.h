@@ -10,6 +10,24 @@
 using namespace glm;
 using namespace std;
 
+struct ActionStack {
+	int bodyPartId;
+	vec3 translationV;
+	vec3 rotationV;
+
+	ActionStack() {
+		bodyPartId = -1;
+		translationV = vec3();
+		rotationV = vec3();
+	}
+
+	ActionStack(int b, vec3 t, vec3 r) {
+		bodyPartId = b;
+		translationV = t;
+		rotationV = r;
+	}
+};
+
 enum RobotState {
 	DEFAULT = 0,
 	WALK = 1,
@@ -92,7 +110,10 @@ private:
 	void DoAttackAction();
 	// shoot
 	void DoShootAction();
+
 	// action helper
 	void actionHelper(int bodyPart, double passTime, vector<float>timerPerState, int stateIndex, vec3 addedTranslation, vec3 addedRotation);
+	// calculate all actionStack depend on actionState
+	void calculateActionStack(vector<vector<ActionStack>> actionStack, int actionState, double passTime, vector<float>timerPerState);
 };
 

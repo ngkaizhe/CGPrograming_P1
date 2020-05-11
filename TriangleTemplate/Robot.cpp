@@ -1,6 +1,5 @@
 ﻿#include "Robot.h"
 
-
 Robot::Robot() {
 	// init model(robot part)
 	robot = vector<Model>(12);
@@ -725,54 +724,104 @@ void Robot::DoClapAction() {
 	passTime -= previousPassTime;
 	previousPassTime = t;
 
-	// state 0 -> 準備動作
-	if (clapState == 0) {
-		// LHAND0
-		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, -36));
-		// RHAND0
-		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, 36));
-	}
+	// actionStack[stateIndex]...
+	vector<vector<ActionStack>> actionStack = 
+	{
+		// state 0 -> 準備動作
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(0, 0, -36)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
 
-	// state 1 -> 雙手準備
-	else if (clapState == 1) {
-		// LHAND0
-		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.085+0.038, 0), vec3(-53, -34, -21+36));
-		// LHAND1
-		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-70, -3, -60));
-		// RHAND0
-		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.095+0.038, 0), vec3(-62, 32, 16-36));
-		// RHAND1
-		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43, 72, -22));
-	}
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(0, 0, 36)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
 
-	// state 2 -> 雙手擊掌
-	else if (clapState == 2) {
-		// LHAND0
-		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
-		// LHAND1
-		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-38+70, -10+3, -93+60));
-		// RHAND0
-		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
-		// RHAND1
-		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43+43, 88-72, -25+22));
-		
-		// HEAD
-		this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, 0.015), vec3(15, 0, 0));
-	}
+			ActionStack(HEAD, vec3(0, 0, 0), vec3(0, 0, 0)),
+		},
+		// state 1 -> 雙手準備
+		{
+			ActionStack(LHAND0, vec3(0, -0.085, 0), vec3(-53, -34, -21)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-70, -3, -60)),
 
-	// state 3 -> 回去雙手準備的狀態
-	else if (clapState == 3) {
-		// LHAND0
-		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
-		// LHAND1
-		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1,-1,-1) * vec3(-38 + 70, -10 + 3, -93 + 60));
-		// RHAND0
-		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
-		// RHAND1
-		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1, -1, -1) * vec3(-43 + 43, 88 - 72, -25 + 22));
+			ActionStack(RHAND0, vec3(0, -0.095, 0), vec3(-62, 32, 16)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-43, 72, -22)),
 
-		// HEAD
-		this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, -0.015), vec3(-15, 0, 0));
+			ActionStack(HEAD, vec3(0, 0, 0), vec3(0, 0, 0)),
+		},
+		// state 2 -> 雙手擊掌
+		{
+			ActionStack(LHAND0, vec3(0, -0.085, 0), vec3(-53, -34, -21)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-38, -10, -93)),
+
+			ActionStack(RHAND0, vec3(0, -0.095, 0), vec3(-62, 32, 16)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-43, 88, -25)),
+
+			ActionStack(HEAD, vec3(0, 0, 0.015), vec3(15, 0, 0)),
+		},
+		// state 3 -> 回去雙手準備的狀態
+		{
+			ActionStack(LHAND0, vec3(0, -0.085, 0), vec3(-53, -34, -21)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-70, -3, -60)),
+
+			ActionStack(RHAND0, vec3(0, -0.095, 0), vec3(-62, 32, 16)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-43, 72, -22)),
+
+			ActionStack(HEAD, vec3(0, 0, 0), vec3(0, 0, 0)),
+		},
+	};
+
+	calculateActionStack(actionStack, clapState, passTime, timerPerState);
+
+	// example
+	if (false) {
+		// state 0 -> 準備動作
+		if (clapState == 0) {
+			// LHAND0
+			this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, -36));
+			// RHAND0
+			this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.038, 0), vec3(0, 0, 36));
+		}
+
+		// state 1 -> 雙手準備
+		else if (clapState == 1) {
+			// LHAND0
+			this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.085 + 0.038, 0), vec3(-53, -34, -21 + 36));
+			// LHAND1
+			this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-70, -3, -60));
+			// RHAND0
+			this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.095 + 0.038, 0), vec3(-62, 32, 16 - 36));
+			// RHAND1
+			this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43, 72, -22));
+		}
+
+		// state 2 -> 雙手擊掌
+		else if (clapState == 2) {
+			// LHAND0
+			this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+			// LHAND1
+			this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-38 + 70, -10 + 3, -93 + 60));
+			// RHAND0
+			this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+			// RHAND1
+			this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43 + 43, 88 - 72, -25 + 22));
+
+			// HEAD
+			this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, 0.015), vec3(15, 0, 0));
+		}
+
+		// state 3 -> 回去雙手準備的狀態
+		else if (clapState == 3) {
+			// LHAND0
+			this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+			// LHAND1
+			this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1, -1, -1) * vec3(-38 + 70, -10 + 3, -93 + 60));
+			// RHAND0
+			this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
+			// RHAND1
+			this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1, -1, -1) * vec3(-43 + 43, 88 - 72, -25 + 22));
+
+			// HEAD
+			this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, -0.015), vec3(-15, 0, 0));
+		}
 	}
 }
 
@@ -800,4 +849,27 @@ void Robot::actionHelper(int bodyPart, double passTime, vector<float>timerPerSta
 	// add up rotation and translation for the correct part
 	this->translatePos[bodyPart] += vec3(xTranslationNeeded, yTranslationNeeded, zTranslationNeeded);
 	this->rotations[bodyPart] += vec3(xRotationNeeded, yRotationNeeded, zRotationNeeded);
+}
+
+// calculate all actionStack depend on actionState
+void Robot::calculateActionStack(vector<vector<ActionStack>> actionStack, int actionState, double passTime, vector<float>timerPerState) {
+	for (int i = 0; i < actionStack[actionState].size(); i++) {
+		// make the body part id is all in same format
+		int bodyPart = actionStack[actionState][i].bodyPartId;
+		vec3 translationR = actionStack[actionState][i].translationV;
+		vec3 rotationR = actionStack[actionState][i].rotationV;
+
+		// get relative translation and rotation
+		if (actionState != 0) {
+			translationR -= actionStack[actionState - 1][i].translationV;
+			rotationR -= actionStack[actionState - 1][i].rotationV;
+		}
+
+		if (bodyPart == -1) {
+			cout << "\n\nInvalid body part used, in clap state!!!\n\n";
+		}
+		else {
+			this->actionHelper(bodyPart, passTime, timerPerState, actionState, translationR, rotationR);
+		}
+	}
 }
