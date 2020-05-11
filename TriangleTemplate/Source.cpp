@@ -54,6 +54,10 @@ GLuint skyView;
 GLuint uniformSkybox;
 GLuint cameraPosition;
 
+// var used for robot shader
+float ambientValue[3] = { 0.1,0.1,0.1 };
+float LightPosition[3] = { 1.0,1.0,1.0 };
+
 // some global var used by skybox shader
 GLuint UBO;
 GLint MatricesIdx;
@@ -130,6 +134,77 @@ GLuint rbo;
 
 // function declaration
 unsigned int loadCubemap(vector<std::string> faces);
+
+//recursion of glut timer func changing the uniform ambient of the shader language
+void AmbientChange(int loop) {
+	if (loop >= 50) {
+		loop = 0;
+	}
+
+	if (ambientAnim == NORMAL_AMBIENT) {
+		ambientValue[0] = 0.1;
+		ambientValue[1] = 0.1;
+		ambientValue[2] = 0.1;
+	}
+	else if (ambientAnim == GLOWING) {
+		ambientValue[0] = ((double)loop - (loop * loop * 0.02)) / 25.0;//quadratic formula
+		ambientValue[1] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+		ambientValue[2] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+	}
+	else if (ambientAnim == GLOWING_RED) {
+		ambientValue[0] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+		ambientValue[1] = 0.1;
+		ambientValue[2] = 0.1;
+	}
+	else if (ambientAnim == GLOWING_GREEN) {
+		ambientValue[0] = 0.1;
+		ambientValue[1] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+		ambientValue[2] = 0.1;
+	}
+	else if (ambientAnim == GLOWING_BLUE) {
+		ambientValue[0] = 0.1;
+		ambientValue[1] = 0.1;
+		ambientValue[2] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+	}
+	else if (ambientAnim == GLOWING_GOLD) {
+		ambientValue[0] = ((double)loop - (loop * loop * 0.02)) / 25.0;
+		ambientValue[1] = ((double)loop - (loop * loop * 0.02)) / 27.0;
+		ambientValue[2] = 0.1;
+	}
+
+	glutPostRedisplay();
+	glutTimerFunc(40, AmbientChange, loop + 1);
+}
+
+void LightChange(int loop2) {
+	if (loop2 >= 360) {
+		loop2 = 0;
+	}
+
+	if (lightAnim == 0) {
+		LightPosition[0] = 1.0;
+		LightPosition[1] = 1.0;
+		LightPosition[2] = 1.0;
+	}
+	else if (lightAnim == 1) {
+		LightPosition[0] = 50 * cos(loop2 * 3.14f / 180);
+		LightPosition[1] = 1.0;
+		LightPosition[2] = 50 * sin(loop2 * 3.14f / 180);
+	}
+	else if (lightAnim == 2) {
+		LightPosition[0] = 50 * cos(loop2 * 3.14f / 180);
+		LightPosition[1] = 50 * sin(loop2 * 3.14f / 180);
+		LightPosition[2] = 10.0;
+	}
+	else if (lightAnim == 3) {
+		LightPosition[0] = 10.0;
+		LightPosition[1] = 50 * cos(loop2 * 3.14f / 180);
+		LightPosition[2] = 50 * sin(loop2 * 3.14f / 180);
+	}
+
+	glutPostRedisplay();
+	glutTimerFunc(10, LightChange, loop2 + 1);
+}
 
 void My_Init()
 {
@@ -242,21 +317,52 @@ void My_Init()
 // GLUT callback. Called to draw the scene.
 void My_Display()
 {
+	int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+
+	// frame buffer used
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
 	glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Update shaders' input variable
-	///////////////////////////	
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	glDepthMask(GL_FALSE);
+	glUseProgram(skyboxShader.ID);
+
+	glUniformMatrix4fv(skyView, 1, GL_FALSE,  &(m_camera.GetViewMatrix() * m_camera.GetModelMatrix())[0][0]);
+	glUniformMatrix4fv(skyProjection, 1, GL_FALSE, &m_camera.GetProjectionMatrix(aspect)[0][0]);
+
+	// skybox cube
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+
+	glDepthFunc(GL_LESS); // set depth function back to default
+	glDepthMask(GL_TRUE);
+	glUseProgram(0);
+
 	robotShader.use();
+	//update data to UBO for MVP
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), &(m_camera.GetViewMatrix() * m_camera.GetModelMatrix()));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(mat4), sizeof(mat4), &m_camera.GetProjectionMatrix(aspect));
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// set robot uniform var
+	glUniform4f(AmbientColor, ambientValue[RED], ambientValue[GREEN], ambientValue[BLUE], 1);
+	glUniform1f(fraction_val, .5f);
+	glUniform1i(shaderMode, shadermode);
+	glUniform3f(LightPos, LightPosition[0], LightPosition[1], LightPosition[2]);
+	glUniform3fv(cameraPosition, 1, glm::value_ptr(m_camera.GetEyePosition()));
 	
 	// set view matrix
 	robotShader.setUniformMatrix4fv("view", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
 	// set projection matrix
 	robotShader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
-
 	// draw robot
 	robot.Draw(robotShader);
-
 	// call robot update function
 	robot.Update();
 
@@ -266,6 +372,22 @@ void My_Display()
 	particleShader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
 	// play particle
 	ParticleManager::getParticleManager()->Draw(particleShader);
+
+
+	// get back to the default framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+	// clear all relevant buffers
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(screenShader.ID);
+	glUniform1i(_PostMode, postmode);
+	glUniform1f(_DeltaTime, (float)timeSinceStart);
+
+	glBindVertexArray(quadVAO);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	///////////////////////////	
 
@@ -279,6 +401,32 @@ void My_Reshape(int width, int height)
 	aspect = width * 1.0f / height;
 	m_camera.SetWindowSize(width, height);
 	glViewport(0, 0, width, height);
+
+	glDeleteRenderbuffers(1, &rbo);
+	glDeleteTextures(1, &textureColorbuffer);
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //Timer event
@@ -356,11 +504,6 @@ void stateMenuFunc(int id) {
 	robot.setState((RobotState)id);
 }
 
-// shader menu function
-void shaderMenuFunc(int id) {
-}
-
-
 // copy from ....
 void ModeMenuEvents(int option) {
 	switch (option) {
@@ -406,8 +549,6 @@ void ShaderAlgorithmEvents(int option) {
 void PostProcessEvents(int option) {
 	postmode = option;
 }
-
-
 void My_Mouse_Moving(int x, int y) {
 	m_camera.mouseMoveEvent(x, y);
 }
@@ -445,6 +586,7 @@ int main(int argc, char *argv[])
 	////////////////////
 	int menu_main = glutCreateMenu(mainMenuFunc);
 	int menu_state = glutCreateMenu(stateMenuFunc);
+	int ModeMenu, ShaderMenu, LightMenu, ShaderAlgorithmMenu, PostProcessMenu;
 
 	glutSetMenu(menu_main);
 	glutAddSubMenu("Action", menu_state);
@@ -458,8 +600,65 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Dance", (int)RobotState::DANCE);
 	glutAddMenuEntry("Shoot", (int)RobotState::SHOOT);
 
-	glutSetMenu(menu_main);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
+	ModeMenu = glutCreateMenu(ModeMenuEvents);//建立右鍵菜單
+	//加入右鍵物件
+	glutAddMenuEntry("Line", 0);
+	glutAddMenuEntry("Fill", 1);
+	glutAddMenuEntry("Point", 2);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
+
+
+	ShaderMenu = glutCreateMenu(ShaderMenuEvents);//建立右鍵菜單
+	glutAddMenuEntry("Normal", 0);
+	glutAddMenuEntry("Glowing", 1);
+	glutAddMenuEntry("Glowing Red", 2);
+	glutAddMenuEntry("Glowing Green", 3);
+	glutAddMenuEntry("Glowing Blue", 4);
+	glutAddMenuEntry("Glowing Gold", 5);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
+
+
+	LightMenu = glutCreateMenu(LightMenuEvents);//建立右鍵菜單
+	glutAddMenuEntry("Normal", 0);
+	glutAddMenuEntry("Rotate A", 1);
+	glutAddMenuEntry("Rotate B", 2);
+	glutAddMenuEntry("Rotate C", 3);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
+
+	ShaderAlgorithmMenu = glutCreateMenu(ShaderAlgorithmEvents);//建立右鍵菜單
+	glutAddMenuEntry("Basic", 0);
+	glutAddMenuEntry("Toon Shader", 1);
+	glutAddMenuEntry("Reflection", 2);
+	glutAddMenuEntry("Glass Refraction", 3);
+	glutAddMenuEntry("Air Refraction", 4);
+	glutAddMenuEntry("Diamond Refraction", 5);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
+
+	PostProcessMenu = glutCreateMenu(PostProcessEvents);//建立右鍵菜單
+	glutAddMenuEntry("Normal", 0);
+	glutAddMenuEntry("Average Blur", 1);
+	glutAddMenuEntry("Median Blur", 2);
+	glutAddMenuEntry("Triangle Blur", 3);
+	glutAddMenuEntry("Gaussian blur", 4);
+	glutAddMenuEntry("Quantization", 5);
+	glutAddMenuEntry("Difference of Gauss", 6);
+	glutAddMenuEntry("Quant and DoG", 7);
+	glutAddMenuEntry("Inverted", 8);
+	glutAddMenuEntry("Grayscale", 9);
+	glutAddMenuEntry("10", 10);
+	glutAddMenuEntry("11", 11);
+	glutAddMenuEntry("12", 12);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
+
+	glutCreateMenu(mainMenuFunc);//建立右鍵菜單
+	//加入右鍵物件
+	glutAddSubMenu("Action", menu_state);
+	glutAddSubMenu("Mode", ModeMenu);
+	glutAddSubMenu("Model Shader", ShaderMenu);
+	glutAddSubMenu("Light Direction", LightMenu);
+	glutAddSubMenu("Shader Algorithm", ShaderAlgorithmMenu);
+	glutAddSubMenu("Filter", PostProcessMenu);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
 	////////////////////
 
 	//Register GLUT callback functions
@@ -472,6 +671,8 @@ int main(int argc, char *argv[])
 	glutTimerFunc(16, My_Timer, 0);
 	glutPassiveMotionFunc(My_Mouse_Moving);
 	glutMotionFunc(My_Mouse_Moving);
+	glutTimerFunc(10, AmbientChange, 0);
+	glutTimerFunc(10, LightChange, 0);
 	////////////////////
 
 	// Enter main event loop.
