@@ -100,14 +100,12 @@ void Robot::ModelMatUpdate(){
 		for (int j = 0; j < relations[i].size(); j++) {
 			int childID = relations[i][j];
 			// relative
-			modelMats[childID] = translate(modelMats[i], relativePositions[childID]);
+			vec3 temp = relativePositions[childID] + translatePos[childID];
+			modelMats[childID] = translate(modelMats[i], temp);
 
-			// self translation and rotation
-			modelMats[childID] = translate(modelMats[childID], translatePos[childID]);
-
-			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].x), vec3(1.0, 0.0, 0.0));
-			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].y), vec3(0.0, 1.0, 0.0));
 			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].z), vec3(0.0, 0.0, 1.0));
+			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].y), vec3(0.0, 1.0, 0.0));
+			modelMats[childID] = rotate(modelMats[childID], radians(rotations[childID].x), vec3(1.0, 0.0, 0.0));
 		}
 	}
 }
@@ -712,7 +710,7 @@ void Robot::DoClapAction() {
 
 	// determine which bow state we are in
 	// by using the std::chrono func provided by c++
-	vector<float>timerPerState = { 2, 2, 0.5, 0.5};
+	vector<float>timerPerState = { 2, 2, 0.1, 0.1};
 	double passTime;
 	int clapState = stateDetermination(timerPerState, passTime, 2);
 
@@ -740,11 +738,11 @@ void Robot::DoClapAction() {
 		// LHAND0
 		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, -0.085+0.038, 0), vec3(-53, -34, -21+36));
 		// LHAND1
-		//this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-47, -3, -55));
+		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-70, -3, -60));
 		// RHAND0
 		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, -0.095+0.038, 0), vec3(-62, 32, 16-36));
 		// RHAND1
-		//this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(-0.797, 0, 0), vec3(-35, 68, -11));
+		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43, 72, -22));
 	}
 
 	// state 2 -> 雙手擊掌
@@ -752,11 +750,14 @@ void Robot::DoClapAction() {
 		// LHAND0
 		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
 		// LHAND1
-		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-42+47, -15+3, -96+55));
+		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-38+70, -10+3, -93+60));
 		// RHAND0
 		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
 		// RHAND1
-		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(218+35, 66-68, 220+11));
+		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-43+43, 88-72, -25+22));
+		
+		// HEAD
+		this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, 0.015), vec3(15, 0, 0));
 	}
 
 	// state 3 -> 回去雙手準備的狀態
@@ -764,11 +765,14 @@ void Robot::DoClapAction() {
 		// LHAND0
 		this->actionHelper(LHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
 		// LHAND1
-		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-47+42, -3+15, -55+96));
+		this->actionHelper(LHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1,-1,-1) * vec3(-38 + 70, -10 + 3, -93 + 60));
 		// RHAND0
 		this->actionHelper(RHAND0, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(0, 0, 0));
 		// RHAND1
-		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-35-218, 68-66, -11-220));
+		this->actionHelper(RHAND1, passTime, timerPerState, clapState, vec3(0, 0, 0), vec3(-1, -1, -1) * vec3(-43 + 43, 88 - 72, -25 + 22));
+
+		// HEAD
+		this->actionHelper(HEAD, passTime, timerPerState, clapState, vec3(0, 0, -0.015), vec3(-15, 0, 0));
 	}
 }
 
