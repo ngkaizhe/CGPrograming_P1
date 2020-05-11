@@ -67,6 +67,9 @@ void Robot::InitModels() {
 	robot[RHAND1] = Model("../Assets/objects/spiderman/RHand1.obj");
 	robot[RLEG0] = Model("../Assets/objects/spiderman/RLeg0.obj");
 	robot[RLEG1] = Model("../Assets/objects/spiderman/RLeg1.obj");
+
+	// init the sphere
+
 }
 
 // draw all models
@@ -978,17 +981,19 @@ void Robot::DoDanceAction() {
 void Robot::DoShootAction() {
 	// state 0 -> 準備動作
 	// state 1 -> 左手扶額頭
-	// state 2 -> 右手擡起
-	// state 3 -> 右手準備噴網
-	// state 4 -> 保持姿勢，右手噴網 
+	// state 2 -> 右手轉出來
+	// state 3 -> 右手沿著x軸轉0.5
+	// state 4 -> 右手沿著x軸轉0.6
+	// state 5 -> 右手回去0.5
+	// state 6 -> 保持姿勢，右手噴網
 	// regular procedure
 	// 0->1->2->3->4->4->4->
 
 	// determine which bow state we are in
 	// by using the std::chrono func provided by c++
-	vector<float>timerPerState = { 2, 1, 0.5, 0.05, 1};
+	vector<float>timerPerState = { 2, 1.5, 0.5, 0.5, 2, 0.1, 0.5};
 	double passTime;
-	int danceState = stateDetermination(timerPerState, passTime, 4);
+	int danceState = stateDetermination(timerPerState, passTime, 6);
 
 	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
 	if (danceState != previousStateIndex) {
@@ -1003,7 +1008,87 @@ void Robot::DoShootAction() {
 
 	// actionStack[stateIndex]...
 	vector<vector<ActionStack>> actionStack =
-	{};
+	{
+		// state 0 -> 準備動作
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(0, 0, -36)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(0, 0, 36)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(HEAD, vec3(0, 0, 0), vec3(0, 0, 0)),
+		},
+
+		// state 1 -> 左手扶額頭
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(0, 0, 36)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+		},
+
+		// state 2 -> 右手轉出來
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(-17.609, 12.4, 34)),
+			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-86.588, -53, 45.153)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+		},
+
+		// state 3 -> 右手沿著x軸轉0.5
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(-7.685, 10.437, 37)),
+			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-68.955, 1.874, 40.56)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+		},
+
+		// state 4 -> 右手沿著x軸轉0.6
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(-7.685, 10.437, 37)),
+			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-56.114, 59.605, 58.471)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+		},
+
+		// state 5 -> 右手回去0.5
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(-7.685, 10.437, 37)),
+			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-68.955, 1.874, 40.56)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+		},
+
+		// state 6 -> 保持姿勢，右手噴網
+		{
+			ActionStack(LHAND0, vec3(-0.063, -0.05, -0.038), vec3(-54.434, -10.115, -44.54)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(26, -51.74, -126)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(-7.685, 10.437, 37)),
+			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-68.955, 1.874, 40.56)),
+
+			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
+
+			// create 3d particle
+
+		},
+	};
 
 	calculateActionStack(actionStack, danceState, passTime, timerPerState);
 }
