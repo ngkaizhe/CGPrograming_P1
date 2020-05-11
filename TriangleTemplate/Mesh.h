@@ -1,6 +1,5 @@
 #pragma once
 #include"Common.h"
-
 #include<string>
 #include<vector>
 
@@ -47,7 +46,7 @@ public:
 
 	// Function
 	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, Material material);
-	void Draw(Shader shader);
+	void Draw(Shader shader, bool isParticle);
 private:
 	// Render data
 	unsigned int VAO, VBO, EBO;

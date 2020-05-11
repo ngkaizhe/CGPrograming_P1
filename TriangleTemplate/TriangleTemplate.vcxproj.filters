@@ -33,6 +33,9 @@
     <ClCompile Include="Robot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ViewManager.h">
@@ -56,12 +59,21 @@
     <ClInclude Include="Constant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Assets\shaders\fragment.fs.glsl">
+    <None Include="..\Assets\shaders\robot.vs.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Assets\shaders\vertex.vs.glsl">
+    <None Include="..\Assets\shaders\robot.fs.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\particle.fs.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\particle.vs.glsl">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

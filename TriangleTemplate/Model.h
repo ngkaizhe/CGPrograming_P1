@@ -21,7 +21,7 @@ public:
 	Model(string path) {
 		loadModel(path);
 	}
-	void Draw(Shader shader);
+	void Draw(Shader shader, bool isParticle=false);
 private:
 	// Model data
 	vector<Mesh> meshes;

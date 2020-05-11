@@ -3,6 +3,7 @@
 #include "Model.h"
 #include "Constant.h"
 #include "Shader.h"
+#include "ParticleManager.h"
 
 #include <vector>
 #include<chrono>
@@ -28,7 +29,7 @@ struct ActionStack {
 	}
 };
 
-enum RobotState {
+enum class RobotState {
 	DEFAULT = 0,
 	WALK = 1,
 	JUMP = 2,
@@ -38,7 +39,7 @@ enum RobotState {
 	SHOOT = 6,
 };
 
-enum ShaderMode {
+enum class ShaderMode {
 
 };
 

@@ -5,9 +5,9 @@
 
 unsigned int TextureFromFile(const char* path, const string& directory);
 
-void Model::Draw(Shader shader) {
+void Model::Draw(Shader shader, bool isParticle) {
 	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
+		meshes[i].Draw(shader, isParticle);
 }
 
 // Function

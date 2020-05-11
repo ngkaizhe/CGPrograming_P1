@@ -17,6 +17,7 @@ float			aspect;
 ViewManager		m_camera;
 
 Shader shader;
+Shader particleShader;
 Robot robot;
 
 
@@ -26,9 +27,14 @@ void My_Init()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	shader = Shader("../Assets/shaders/vertex.vs.glsl", "../Assets/shaders/fragment.fs.glsl");
+	// robot shader
+	shader = Shader("../Assets/shaders/robot.vs.glsl", "../Assets/shaders/robot.fs.glsl");
+	particleShader = Shader("../Assets/shaders/particle.vs.glsl", "../Assets/shaders/particle.fs.glsl");
+	
 	robot = Robot();
 	robot.InitModels();
+
+	ParticleManager::getParticleManager()->startShoot(vec3(0, 0, 0));
 }
 
 // GLUT callback. Called to draw the scene.
@@ -47,10 +53,17 @@ void My_Display()
 	shader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
 
 	// draw robot
-	robot.Draw(shader);
+	// robot.Draw(shader);
 
 	// call robot update function
 	robot.Update();
+
+	// set view matrix
+	particleShader.setUniformMatrix4fv("view", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
+	// set projection matrix
+	particleShader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
+	// play particle
+	ParticleManager::getParticleManager()->Draw(particleShader);
 
 	///////////////////////////	
 
@@ -189,12 +202,12 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Exit", MENU_EXIT);
 
 	glutSetMenu(menu_state);
-	glutAddMenuEntry("Default", RobotState::DEFAULT);
-	glutAddMenuEntry("Walk", RobotState::WALK);
-	glutAddMenuEntry("Jump", RobotState::JUMP);
-	glutAddMenuEntry("Clap Hand", RobotState::CLAP);
-	glutAddMenuEntry("Dance", RobotState::DANCE);
-	glutAddMenuEntry("Shoot", RobotState::SHOOT);
+	glutAddMenuEntry("Default", (int)RobotState::DEFAULT);
+	glutAddMenuEntry("Walk", (int)RobotState::WALK);
+	glutAddMenuEntry("Jump", (int)RobotState::JUMP);
+	glutAddMenuEntry("Clap Hand", (int)RobotState::CLAP);
+	glutAddMenuEntry("Dance", (int)RobotState::DANCE);
+	glutAddMenuEntry("Shoot", (int)RobotState::SHOOT);
 
 	glutSetMenu(menu_main);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

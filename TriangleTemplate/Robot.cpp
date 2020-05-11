@@ -52,6 +52,9 @@ Robot::Robot() {
 
 	// init timer
 	timer = chrono::steady_clock::now();
+
+	// init particle
+	ParticleManager::getParticleManager();
 }
 
 void Robot::InitModels() {
@@ -69,7 +72,7 @@ void Robot::InitModels() {
 	robot[RLEG1] = Model("../Assets/objects/spiderman/RLeg1.obj");
 
 	// init the sphere
-
+	ParticleManager::getParticleManager()->init();
 }
 
 // draw all models
@@ -85,6 +88,9 @@ void Robot::Draw(Shader shader) {
 void Robot::Update() {
 	ActionUpdate();
 	ModelMatUpdate();
+
+	// update particle
+	ParticleManager::getParticleManager()->Update();
 }
 
 // model mat update
@@ -135,6 +141,8 @@ void Robot::ActionUpdate() {
 		default:
 			break;
 	}
+
+	// 3d particle
 }
 
 // state transition
@@ -149,6 +157,11 @@ void Robot::setState(RobotState toState) {
 		// reset state transition used var
 		previousPassTime = 0;
 		previousStateIndex = 0;
+
+		// check whether we change from shoot state
+		if (this->robotState == RobotState::SHOOT) {
+			ParticleManager::getParticleManager()->stopShoot();
+		}
 	}
 
 	// set the state
@@ -993,11 +1006,11 @@ void Robot::DoShootAction() {
 	// by using the std::chrono func provided by c++
 	vector<float>timerPerState = { 2, 1.5, 0.5, 0.5, 2, 0.1, 0.5};
 	double passTime;
-	int danceState = stateDetermination(timerPerState, passTime, 6);
+	int shootState = stateDetermination(timerPerState, passTime, 6);
 
 	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
-	if (danceState != previousStateIndex) {
-		previousStateIndex = danceState;
+	if (shootState != previousStateIndex) {
+		previousStateIndex = shootState;
 		previousPassTime = 0;
 	}
 
@@ -1084,13 +1097,16 @@ void Robot::DoShootAction() {
 			ActionStack(RHAND1, vec3(0.027, 0.032, 0.003), vec3(-68.955, 1.874, 40.56)),
 
 			ActionStack(HEAD, vec3(0, 0.02, 0.03), vec3(26.235, 22.16, 9.233)),
-
-			// create 3d particle
-
 		},
 	};
 
-	calculateActionStack(actionStack, danceState, passTime, timerPerState);
+	calculateActionStack(actionStack, shootState, passTime, timerPerState);
+
+	// create particle in the last state
+	if (shootState == 6) {
+		// create 3d particle
+		ParticleManager::getParticleManager()->startShoot(vec3(-0.509, -0.51, 0.5));
+	}
 }
 
 // action helper

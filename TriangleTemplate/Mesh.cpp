@@ -9,39 +9,48 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture
 	this->setupMesh();
 }
 
-void Mesh::Draw(Shader shader) {
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
+void Mesh::Draw(Shader shader, bool isParticle) {
+	// if the item to draw is particle, we dont need material
+	if (!isParticle) {
+		unsigned int diffuseNr = 1;
+		unsigned int specularNr = 1;
 
-	// active used mesh's texture
-	for (unsigned int i = 0; i < textures.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
+		// active used mesh's texture
+		for (unsigned int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
 
-		string number;
-		string name = textures[i].type;
+			string number;
+			string name = textures[i].type;
 
-		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++);
+			if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++);
 
-		shader.setUniformInt((name + number).c_str(), i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			shader.setUniformInt((name + number).c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+		glActiveTexture(GL_TEXTURE0);
+
+		// no texture are used, so might be only used one colour(rgba)
+		if (textures.size() == 0) {
+			shader.setUniform3fv("material.ambient", material.ambient);
+			shader.setUniform3fv("material.diffuse", material.diffuse);
+			shader.setUniform3fv("material.specular", material.specular);
+			shader.setUniformFloat("material.shininess", 32);
+		}
+
+		// draw mesh
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
-	glActiveTexture(GL_TEXTURE0);
-
-	// no texture are used, so might be only used one colour(rgba)
-	if (textures.size() == 0) {
-		shader.setUniform3fv("material.ambient", material.ambient);
-		shader.setUniform3fv("material.diffuse", material.diffuse);
-		shader.setUniform3fv("material.specular", material.specular);
-		shader.setUniformFloat("material.shininess", 32);
+	else {
+		// it is particle do something
+		// use our own vbo to set objPos
+		// bind our position here
+		
 	}
-
-	// draw mesh
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }
 
 void Mesh::setupMesh() {
