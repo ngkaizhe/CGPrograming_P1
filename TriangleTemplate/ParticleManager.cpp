@@ -6,7 +6,7 @@ ParticleManager::ParticleManager() {
     totalInstance = 0;
     positions = vector<vec3>(0);
     directions = vector<vec3>(0);
-    zSpeed = 0.05f;
+    zSpeed = 0.1f;
     startPosition = vec3(0.0);
 }
 
@@ -23,7 +23,8 @@ void ParticleManager::init() {
 
 // draw the instance
 void ParticleManager::Draw(Shader shader) {
-    particleModel.Draw(shader, true);
+    if(isShoot)
+        particleModel.Draw(shader, true);
 }
 
 // update all instance position
@@ -51,7 +52,7 @@ void ParticleManager::stopShoot() {
 void ParticleManager::DiscardUpdate() {
     // if the obj run out to certain position
     for (int i = this->positions.size() - 1; i >= 0; i--) {
-        if (positions[i].z <= -5.0f) {
+        if (positions[i].z > 20.0f) {
             positions.erase(positions.begin() + i);
             directions.erase(directions.begin() + i);
         }

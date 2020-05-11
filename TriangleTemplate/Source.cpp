@@ -33,8 +33,6 @@ void My_Init()
 	
 	robot = Robot();
 	robot.InitModels();
-
-	ParticleManager::getParticleManager()->startShoot(vec3(0, 0, 0));
 }
 
 // GLUT callback. Called to draw the scene.
@@ -53,7 +51,7 @@ void My_Display()
 	shader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
 
 	// draw robot
-	// robot.Draw(shader);
+	robot.Draw(shader);
 
 	// call robot update function
 	robot.Update();

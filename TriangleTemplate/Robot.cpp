@@ -1105,7 +1105,7 @@ void Robot::DoShootAction() {
 	// create particle in the last state
 	if (shootState == 6) {
 		// create 3d particle
-		ParticleManager::getParticleManager()->startShoot(vec3(-0.509, -0.51, 0.5));
+		ParticleManager::getParticleManager()->startShoot(vec3(-0.509, 0.49, 0.501));
 	}
 }
 

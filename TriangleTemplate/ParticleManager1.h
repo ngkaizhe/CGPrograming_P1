@@ -10,7 +10,10 @@ using namespace glm;
 class ParticleManager
 {
 public:
-	static ParticleManager* getParticleManager();
+	static ParticleManager* getParticleManager() {
+		if (!instance) instance = new ParticleManager();
+		return instance;
+	}
 
 	// get model from sphere obj
 	void init();
@@ -20,7 +23,7 @@ public:
 
 	// update all instance position
 	void Update();
-
+	
 	// start shoot
 	void startShoot(vec3 startPosition);
 	void stopShoot();

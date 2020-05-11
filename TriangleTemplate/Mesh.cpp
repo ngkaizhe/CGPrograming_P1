@@ -52,6 +52,8 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 		// bind our position here
 		ParticleManager* particleManager = ParticleManager::getParticleManager();
 		if (particleManager->positions.size() != 0) {
+			// draw mesh
+			glBindVertexArray(VAO);
 			unsigned int instanceVBO;
 			glGenBuffers(1, &instanceVBO);
 
@@ -60,8 +62,10 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
 			glVertexAttribDivisor(3, 1);
 			glEnableVertexAttribArray(3);
-
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, particleManager->positions.size());
+			glBindVertexArray(0);
 		}
 	}
 }
