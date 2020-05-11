@@ -34,7 +34,7 @@ enum RobotState {
 	JUMP = 2,
 	CLAP = 3,
 	ORZ = 4,
-	ATTACK = 5,
+	DANCE = 5,
 	SHOOT = 6,
 };
 
@@ -107,7 +107,7 @@ private:
 	// bow down
 	void DoClapAction();
 	// attack
-	void DoAttackAction();
+	void DoDanceAction();
 	// shoot
 	void DoShootAction();
 

@@ -123,8 +123,8 @@ void Robot::ActionUpdate() {
 		case RobotState::CLAP:
 			this->DoClapAction();
 			break;
-		case RobotState::ATTACK:
-			this->DoAttackAction();
+		case RobotState::DANCE:
+			this->DoDanceAction();
 			break;
 		case RobotState::SHOOT:
 			this->DoShootAction();
@@ -825,9 +825,153 @@ void Robot::DoClapAction() {
 	}
 }
 
-// attack
-void Robot::DoAttackAction() {
+// dance
+void Robot::DoDanceAction() {
+	// state 0 -> 準備動作
+	// state 1 -> 雙手1
+	// state 2 -> 雙手2
+	// state 3 -> 雙手3
+	// state 4 -> 雙手4
+	// state 5 -> 雙手1
+	// regular procedure
+	// 0->1->2->3->4->5->2->3->4->5->2->3->4->5....
 
+	// determine which bow state we are in
+	// by using the std::chrono func provided by c++
+	vector<float>timerPerState = { 2, 0.3, 0.3, 0.3, 0.3, 0.3 };
+	double passTime;
+	int danceState = stateDetermination(timerPerState, passTime, 2);
+
+	// if the state wasn't same against the previousStateIndex we reset the previousPassTime
+	if (danceState != previousStateIndex) {
+		previousStateIndex = danceState;
+		previousPassTime = 0;
+	}
+
+	// recalculate the passTime to be interval between previousPassTime instead of the state time
+	double t = passTime;
+	passTime -= previousPassTime;
+	previousPassTime = t;
+
+	// actionStack[stateIndex]...
+	vector<vector<ActionStack>> actionStack =
+	{
+		// state 0 -> 準備動作
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(0, 0, -36)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(RHAND0, vec3(0, -0.038, 0), vec3(0, 0, 36)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(BODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+			ActionStack(LBODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(0, 0, 0), vec3(0, 0, 0)),
+			ActionStack(LLEG1, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			ActionStack(RLEG0, vec3(0, 0, 0), vec3(0, 0, 0)),
+			ActionStack(RLEG1, vec3(0, 0, 0), vec3(0, 0, 0)),
+		},
+
+		// state 1 -> 雙手1
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(-93.348, -65.284, 35.294)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-62.43, -14.762, -40.297)),
+
+			ActionStack(RHAND0, vec3(0.018, -0.097, -0.045), vec3(-85.224, 22.581, 12.621)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-20.815, 8.708, 101.014)),
+
+			ActionStack(BODY, vec3(0.3, 0, 0), vec3(0, 0, 20)),
+			ActionStack(LBODY, vec3(-0.048, 0.082, -0.021), vec3(0, 0, -20)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(0, 0, 0), vec3(0, -15, 0)),
+			ActionStack(LLEG1, vec3(0.011, 0.069, 0.023), vec3(28.543, 3.185, -11.362)),
+
+			ActionStack(RLEG0, vec3(0, 0, 0), vec3(0, 15, 0)),
+			ActionStack(RLEG1, vec3(-0.012, 0.048, 0.02), vec3(24.782, -2.931, 11.642)),
+		},
+
+		// state 2 -> 雙手2
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, -0.029), vec3(-78.338, -50.737, 22.44)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-98.338, -24.87, -28.651)),
+
+			ActionStack(RHAND0, vec3(0.027, -0.112, -0.065), vec3(-84.575, 25.204, 12.884)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-53.73, 30.308, 88.686)),
+
+			ActionStack(BODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+			ActionStack(LBODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(-0.071, 0.066, 0.014), vec3(8.095, 36.095, 27.733)),
+			ActionStack(LLEG1, vec3(0.011, 0.069, 0.023), vec3(28.543, 3.185, -11.362)),
+
+			ActionStack(RLEG0, vec3(0.043, 0.052, 0.004), vec3(1.822, -15.067, -24.098)),
+			ActionStack(RLEG1, vec3(-0.012, 0.048, 0.02), vec3(24.782, -2.931, 11.642)),
+		},
+
+		// state 3 -> 雙手3
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(-72.452, -39.511, 18.248)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-67.196, -29.053, -63.75)),
+
+			ActionStack(RHAND0, vec3(0.018, -0.097, -0.045), vec3(-75.895, 50.064, 18.318)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-21.191, 14.836, 70.762)),
+
+			ActionStack(BODY, vec3(-0.3, 0, 0), vec3(0, 0, -20)),
+			ActionStack(LBODY, vec3(0.04, 0.1, 0.005), vec3(0, 0, 20)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(0, 0, 0), vec3(0, -15, 0)),
+			ActionStack(LLEG1, vec3(0.011, 0.069, 0.023), vec3(28.543, 3.185, -11.362)),
+
+			ActionStack(RLEG0, vec3(0, 0, 0), vec3(0, 15, 0)),
+			ActionStack(RLEG1, vec3(-0.012, 0.048, 0.02), vec3(24.782, -2.931, 11.642)),
+		},
+
+		// state 4 -> 雙手4
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, -0.029), vec3(-78.338, -50.737, 22.44)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-98.338, -24.87, -28.651)),
+
+			ActionStack(RHAND0, vec3(0.027, -0.112, -0.065), vec3(-84.575, 25.204, 12.884)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-53.73, 30.308, 88.686)),
+
+			ActionStack(BODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+			ActionStack(LBODY, vec3(0, 0, 0), vec3(0, 0, 0)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(-0.071, 0.066, 0.014), vec3(8.095, 36.095, 27.733)),
+			ActionStack(LLEG1, vec3(0.011, 0.069, 0.023), vec3(28.543, 3.185, -11.362)),
+
+			ActionStack(RLEG0, vec3(0.043, 0.052, 0.004), vec3(1.822, -15.067, -24.098)),
+			ActionStack(RLEG1, vec3(-0.012, 0.048, 0.02), vec3(24.782, -2.931, 11.642)),
+		},
+
+		// state 5 -> 雙手1
+		{
+			ActionStack(LHAND0, vec3(0, -0.038, 0), vec3(-93.348, -65.284, 35.294)),
+			ActionStack(LHAND1, vec3(0, 0, 0), vec3(-62.43, -14.762, -40.297)),
+
+			ActionStack(RHAND0, vec3(0.018, -0.097, -0.045), vec3(-85.224, 22.581, 12.621)),
+			ActionStack(RHAND1, vec3(0, 0, 0), vec3(-20.815, 8.708, 101.014)),
+
+			ActionStack(BODY, vec3(0.3, 0, 0), vec3(0, 0, 20)),
+			ActionStack(LBODY, vec3(-0.048, 0.082, -0.021), vec3(0, 0, -20)),
+
+			// leg 
+			ActionStack(LLEG0, vec3(0, 0, 0), vec3(0, -15, 0)),
+			ActionStack(LLEG1, vec3(0.011, 0.069, 0.023), vec3(28.543, 3.185, -11.362)),
+
+			ActionStack(RLEG0, vec3(0, 0, 0), vec3(0, 15, 0)),
+			ActionStack(RLEG1, vec3(-0.012, 0.048, 0.02), vec3(24.782, -2.931, 11.642)),
+		},
+	};
+
+	calculateActionStack(actionStack, danceState, passTime, timerPerState);
 }
 
 // shoot
@@ -861,12 +1005,18 @@ void Robot::calculateActionStack(vector<vector<ActionStack>> actionStack, int ac
 
 		// get relative translation and rotation
 		if (actionState != 0) {
-			translationR -= actionStack[actionState - 1][i].translationV;
-			rotationR -= actionStack[actionState - 1][i].rotationV;
+			if (actionStack[actionState - 1][i].bodyPartId != bodyPart) {
+				cout << "\n\nThe previos state should be the same body part id!!!\n\n";
+			}
+
+			else {
+				translationR -= actionStack[actionState - 1][i].translationV;
+				rotationR -= actionStack[actionState - 1][i].rotationV;
+			}
 		}
 
 		if (bodyPart == -1) {
-			cout << "\n\nInvalid body part used, in clap state!!!\n\n";
+			cout << "\n\nInvalid body part used, in action state!!!\n\n";
 		}
 		else {
 			this->actionHelper(bodyPart, passTime, timerPerState, actionState, translationR, rotationR);
