@@ -286,7 +286,7 @@ void ViewManager::SetWindowSize(int width, int height) {
 	w_width = width;
 	w_height = height;
 	projMatrix = GetProjectionMatrix();
-	aspect = height / width;
+	aspect = (float)width / height;
 }
 
 
