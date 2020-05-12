@@ -7,6 +7,8 @@
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vertexNormal;
 layout(location = 2) in vec2 vertexUV;
+layout(location = 3) in vec3 tangent;
+layout(location = 4) in vec3 bitangent;
 
 uniform vec3 vLightPosition;
 
@@ -16,28 +18,43 @@ uniform mat4 Projection;
 uniform mat4 Model;
 
 // Color to fragment program
-out vec3 vVaryingNormal;
 out vec3 vVaryingLightDir;
 out vec3 vPosition3;
 out vec2 UV;
+
+// view pos
+uniform vec3 cameraPos;
+out vec3 TangentLightPos;
+out vec3 TangentViewPos;
+out vec3 TangentFragPos;
 
 void main(void) 
 { 
 	mat4 MVP = Projection*View*Model;
 	mat4 MV = View*Model;
-	
-    // Get surface normal in eye coordinates
-	mat3 normalMatrix = mat3(MV);//normal matrix is MV matrix's 3*3 excluding 'w' 
-    vVaryingNormal = normalMatrix * vertexNormal;
+
+    // Don't forget to transform the geometry!
+    gl_Position = MVP * vec4(vPosition, 1);
+
+    // ouput UV
+    UV = vertexUV;
 
     // Get vertex position in eye coordinates
     vec4 vPosition4 = MV * vec4(vPosition,1);
-    vec3 vPosition3 = vPosition4.xyz / vPosition4.w;
+    vPosition3 = vPosition4.xyz / vPosition4.w;
+
+    // calculate the TBN for normal map
+    mat3 normalMatrix = transpose(inverse(mat3(Model)));
+    vec3 T = normalize(normalMatrix * tangent);
+    vec3 N = normalize(normalMatrix * vertexNormal);
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
+    
+    mat3 TBN = transpose(mat3(T, B, N));    
+    TangentLightPos = TBN * vLightPosition;
+    TangentViewPos  = TBN * cameraPos;
+    TangentFragPos  = TBN * vec3(Model * vec4(vPosition, 1.0)); 
 
     // Get vector to light source
-    vVaryingLightDir = normalize(vLightPosition - vPosition3);
-
-	UV = vertexUV;
-    // Don't forget to transform the geometry!
-    gl_Position = MVP * vec4(vPosition,1);
+    vVaryingLightDir = normalize(TangentLightPos - TangentFragPos);
 }

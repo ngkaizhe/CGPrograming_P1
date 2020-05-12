@@ -15,6 +15,7 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 	if (!isParticle) {
 		unsigned int diffuseNr = 1;
 		unsigned int specularNr = 1;
+		unsigned int normNr = 1;
 
 		// active used mesh's texture
 		for (unsigned int i = 0; i < textures.size(); i++) {
@@ -27,12 +28,15 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 				number = std::to_string(diffuseNr++);
 			else if (name == "texture_specular")
 				number = std::to_string(specularNr++);
+			else if (name == "texture_normal")
+				number = std::to_string(normNr++);
 
 			shader.setUniformInt((name + number).c_str(), i + 1);
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
 		glActiveTexture(GL_TEXTURE1);
 		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE3);
 
 		// no texture are used, so might be only used one colour(rgba)
 		if (textures.size() == 0) {
@@ -93,6 +97,12 @@ void Mesh::setupMesh() {
 	// texture
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	// tangent
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+	// bitangent
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	// unbind vao
 	glBindVertexArray(0);
