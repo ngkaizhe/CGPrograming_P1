@@ -214,7 +214,7 @@ void My_Init()
 	glDepthFunc(GL_LEQUAL);
 
 	// robot shader
-	robotShader = Shader("../Assets/shaders/robot.vs.glsl", "../Assets/shaders/robot.fs.glsl");
+	robotShader = Shader("../Assets/shaders/robot2.vp", "../Assets/shaders/robot2.fp");
 	robot = Robot();
 	robot.InitModels();
 	// particle
@@ -369,11 +369,13 @@ void My_Display()
 	glUniform1i(shaderMode, shadermode);
 	glUniform3f(LightPos, LightPosition[0], LightPosition[1], LightPosition[2]);
 	glUniform3fv(cameraPosition, 1, glm::value_ptr(m_camera.GetEyePosition()));
+	// set uniform skybox
+	glUniform1i(uniformSkybox, 0);
 	
 	// set view matrix
-	robotShader.setUniformMatrix4fv("view", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
+	robotShader.setUniformMatrix4fv("View", m_camera.GetViewMatrix() * m_camera.GetModelMatrix());
 	// set projection matrix
-	robotShader.setUniformMatrix4fv("projection", m_camera.GetProjectionMatrix(aspect));
+	robotShader.setUniformMatrix4fv("Projection", m_camera.GetProjectionMatrix(aspect));
 	// draw robot
 	robot.Draw(robotShader);
 	// call robot update function
@@ -599,7 +601,7 @@ int main(int argc, char *argv[])
 	////////////////////
 	int menu_main = glutCreateMenu(mainMenuFunc);
 	int menu_state = glutCreateMenu(stateMenuFunc);
-	int ModeMenu, ShaderMenu, LightMenu, ShaderAlgorithmMenu, PostProcessMenu;
+	int ShaderMenu, LightMenu, ShaderAlgorithmMenu, PostProcessMenu;
 
 	glutSetMenu(menu_main);
 	glutAddSubMenu("Action", menu_state);
@@ -613,14 +615,6 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Dance", (int)RobotState::DANCE);
 	glutAddMenuEntry("Shoot", (int)RobotState::SHOOT);
 
-	ModeMenu = glutCreateMenu(ModeMenuEvents);//建立右鍵菜單
-	//加入右鍵物件
-	glutAddMenuEntry("Line", 0);
-	glutAddMenuEntry("Fill", 1);
-	glutAddMenuEntry("Point", 2);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
-
-
 	ShaderMenu = glutCreateMenu(ShaderMenuEvents);//建立右鍵菜單
 	glutAddMenuEntry("Normal", 0);
 	glutAddMenuEntry("Glowing", 1);
@@ -629,7 +623,6 @@ int main(int argc, char *argv[])
 	glutAddMenuEntry("Glowing Blue", 4);
 	glutAddMenuEntry("Glowing Gold", 5);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);	//與右鍵關聯
-
 
 	LightMenu = glutCreateMenu(LightMenuEvents);//建立右鍵菜單
 	glutAddMenuEntry("Normal", 0);
@@ -666,7 +659,6 @@ int main(int argc, char *argv[])
 	glutCreateMenu(mainMenuFunc);//建立右鍵菜單
 	//加入右鍵物件
 	glutAddSubMenu("Action", menu_state);
-	glutAddSubMenu("Mode", ModeMenu);
 	glutAddSubMenu("Model Shader", ShaderMenu);
 	glutAddSubMenu("Light Direction", LightMenu);
 	glutAddSubMenu("Shader Algorithm", ShaderAlgorithmMenu);

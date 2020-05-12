@@ -79,7 +79,7 @@ void Robot::InitModels() {
 void Robot::Draw(Shader shader) {
 	// draw each models after setting the model mat
 	for (int i = 0; i < modelMats.size(); i++) {
-		shader.setUniformMatrix4fv("model", modelMats[i]);
+		shader.setUniformMatrix4fv("Model", modelMats[i]);
 		robot[i].Draw(shader);
 	}
 }

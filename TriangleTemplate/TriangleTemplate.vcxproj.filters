@@ -88,5 +88,11 @@
     <None Include="..\Assets\shaders\skybox.vp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\Assets\shaders\robot2.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\robot2.vp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

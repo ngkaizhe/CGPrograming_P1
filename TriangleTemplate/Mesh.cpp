@@ -18,7 +18,7 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 
 		// active used mesh's texture
 		for (unsigned int i = 0; i < textures.size(); i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
+			glActiveTexture(GL_TEXTURE0 + i + 1);
 
 			string number;
 			string name = textures[i].type;
@@ -28,10 +28,11 @@ void Mesh::Draw(Shader shader, bool isParticle) {
 			else if (name == "texture_specular")
 				number = std::to_string(specularNr++);
 
-			shader.setUniformInt((name + number).c_str(), i);
+			shader.setUniformInt((name + number).c_str(), i + 1);
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE2);
 
 		// no texture are used, so might be only used one colour(rgba)
 		if (textures.size() == 0) {
