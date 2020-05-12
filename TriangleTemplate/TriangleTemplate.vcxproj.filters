@@ -76,5 +76,17 @@
     <None Include="..\Assets\shaders\particle.vs.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\Assets\shaders\Image_Processing.fs.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\Image_Processing.vs.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\skybox.fp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Assets\shaders\skybox.vp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

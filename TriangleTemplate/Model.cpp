@@ -13,7 +13,7 @@ void Model::Draw(Shader shader, bool isParticle) {
 // Function
 void Model::loadModel(string path) {
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -69,21 +69,21 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
         else
             texCoords = glm::vec2(0.0f, 0.0f);
-        //// tangent
-        //tangent.x = mesh->mTangents[i].x;
-        //tangent.y = mesh->mTangents[i].y;
-        //tangent.z = mesh->mTangents[i].z;
-        //
-        //// bitangent
-        //bitangent.x = mesh->mBitangents[i].x;
-        //bitangent.y = mesh->mBitangents[i].y;
-        //bitangent.z = mesh->mBitangents[i].z;
+        // tangent
+        tangent.x = mesh->mTangents[i].x;
+        tangent.y = mesh->mTangents[i].y;
+        tangent.z = mesh->mTangents[i].z;
+        
+        // bitangent
+        bitangent.x = mesh->mBitangents[i].x;
+        bitangent.y = mesh->mBitangents[i].y;
+        bitangent.z = mesh->mBitangents[i].z;
 
         vertex.Position = position;
         vertex.Normal = normal;
         vertex.TexCoords = texCoords;
-        /*vertex.Tangent = tangent;
-        vertex.Bitangent = bitangent;*/
+        vertex.Tangent = tangent;
+        vertex.Bitangent = bitangent;
         vertices.push_back(vertex);
     }
 

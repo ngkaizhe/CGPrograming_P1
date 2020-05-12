@@ -140,10 +140,14 @@
     <ClInclude Include="ViewManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Assets\shaders\Image_Processing.fs.glsl" />
+    <None Include="..\Assets\shaders\Image_Processing.vs.glsl" />
     <None Include="..\Assets\shaders\particle.fs.glsl" />
     <None Include="..\Assets\shaders\particle.vs.glsl" />
     <None Include="..\Assets\shaders\robot.fs.glsl" />
     <None Include="..\Assets\shaders\robot.vs.glsl" />
+    <None Include="..\Assets\shaders\skybox.fp" />
+    <None Include="..\Assets\shaders\skybox.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

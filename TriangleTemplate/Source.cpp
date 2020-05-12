@@ -115,7 +115,8 @@ float skyboxVertices[] = {
 };
 
 // quad part(I think is used for screen shader)
-float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+float quadVertices[] = { 
+	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 		// positions   // texCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
 		-1.0f, -1.0f,  0.0f, 0.0f,
@@ -230,9 +231,9 @@ void My_Init()
 	fraction_val = glGetUniformLocation(robotShader.ID, "fraction");
 	uniformSkybox = glGetUniformLocation(robotShader.ID, "skybox");
 	cameraPosition = glGetUniformLocation(robotShader.ID, "cameraPos");
-
 	// init for UBO(skybox)
 	MatricesIdx = glGetUniformBlockIndex(robotShader.ID, "MatVP");
+
 	// UBO
 	glGenBuffers(1, &UBO);
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
@@ -245,6 +246,13 @@ void My_Init()
 	glUniformBlockBinding(robotShader.ID, MatricesIdx, 0);
 
 	// skybox vao
+	// scale it larger
+	float scaleMul = 3;
+	for (int i = 0; i < 36; i++) {
+		skyboxVertices[i * 3] *= scaleMul;
+		skyboxVertices[i * 3 + 1] *= scaleMul;
+		skyboxVertices[i * 3 + 2] *= scaleMul;
+	}
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
 	glBindVertexArray(skyboxVAO);
@@ -329,7 +337,12 @@ void My_Display()
 	glDepthMask(GL_FALSE);
 	glUseProgram(skyboxShader.ID);
 
-	glUniformMatrix4fv(skyView, 1, GL_FALSE,  &(m_camera.GetViewMatrix() * m_camera.GetModelMatrix())[0][0]);
+	glm::mat4 viewMatWithoutTranslation = m_camera.GetViewMatrix() * m_camera.GetModelMatrix();
+	viewMatWithoutTranslation[3][0] = 0;
+	viewMatWithoutTranslation[3][1] = 0;
+	viewMatWithoutTranslation[3][2] = 0;
+
+	glUniformMatrix4fv(skyView, 1, GL_FALSE,  &(viewMatWithoutTranslation)[0][0]);
 	glUniformMatrix4fv(skyProjection, 1, GL_FALSE, &m_camera.GetProjectionMatrix(aspect)[0][0]);
 
 	// skybox cube
